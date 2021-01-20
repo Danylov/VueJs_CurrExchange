@@ -1,6 +1,6 @@
 # currencyexchange
 
-> A Vue.js project
+> A Vue.js currency exchange project
 
 ## Build Setup
 
