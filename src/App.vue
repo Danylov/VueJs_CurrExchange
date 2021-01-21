@@ -9,14 +9,14 @@
       </a>
     </div>
     <div class="ui stackable two column grid">
-      <div class="column">
+      <div class="ten wide column">
         <converter
           :base="baseCurrency"
           :currencies="rates"
           @changeBase="getRates">
         </converter>
       </div>
-      <div class="column">
+      <div class="six wide column">
         <div v-if="hasError" class="ui error message">
           An error ocurred during request. Please, try again later
         </div>

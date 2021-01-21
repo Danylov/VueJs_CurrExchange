@@ -1,8 +1,14 @@
 <template>
   <div>
     <div class="ui form">
+
       <div class="fields inline">
-        <div class="field seven wide">
+        <div class="field three wide">
+          <div class="ui input">
+            <input type="number" placeholder="1">
+          </div>
+        </div>
+        <div class="field six wide">
           <div>
           <select class="ui fluid search selection dropdown">
               <option class="item" v-for="currency in currencies" data-value="currency.currencyCode" :key="currency.currencyCode">
@@ -11,12 +17,7 @@
           </select>
           </div>
         </div>
-        <div class="field two wide">
-          <button class="ui icon fluid teal button" @click="exchangeCurrencies">
-            <i class="exchange icon"></i>
-          </button>
-        </div>
-        <div class="field seven wide">
+        <div class="field six wide">
           <div>
           <select class="ui fluid search selection dropdown">
               <option class="item" v-for="currency in currencies" :data-value="currency.currencyCode">
@@ -25,16 +26,14 @@
             </select>
           </div>
           </div>
+        <div>
+          <input id="convresult" readonly>
+        </div>
         </div>
       </div>
       <div class="fields inline">
-        <div class="field eight wide">
-          <div class="ui big input">
-            <input type="number" placeholder="1">
-          </div>
-        </div>
         <div class="field six wide">
-          <button class="ui big teal fluid button right floated" @click="changeBase(model.fromCurrency)">
+          <button class="ui big teal fluid button right floated" @click="changeBase(model.fromCurrency, model.toCurrency)">
             Convert
           </button>
         </div>
@@ -43,19 +42,34 @@
 </template>
 
 <script>
+import jQuery from "jquery";
 export default {
   name: 'converter',
   props: ['currencies', 'base'],
   methods: {
-    exchangeCurrencies: function () {
-      this.model = Object.assign({}, { fromCurrency: this.model.toCurrency, toCurrency: this.model.fromCurrency })
-      /* eslint-disable no-undef */
-      jQuery('#toCurrency').dropdown('set value', this.model.toCurrency)
-      /* eslint-disable no-undef */
-      jQuery('#fromCurrency').dropdown('set value', this.model.fromCurrency)
-    },
-    changeBase: function (base) {
-      this.$emit('changeBase', base)
+    changeBase: function (fromCurrency, toCurrency) {
+      this.$emit('changeBase', fromCurrency);
+      let rate = new Promise((resolve, reject) => {
+        let xmlHttp = new XMLHttpRequest();
+        console.log(`fromCurrency = `,fromCurrency); // Отладка
+        console.log(`toCurrency = `,toCurrency); // Отладка
+        const url = `https://api.exchangeratesapi.io/latest?symbols=` + fromCurrency + `,` + toCurrency;
+        xmlHttp.open('GET', url, true)
+        xmlHttp.onload = function () {
+          if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+            resolve(JSON.parse(xmlHttp.responseText).rates);
+          } else {
+            reject()
+          }
+        };
+        xmlHttp.onerror = reject;
+        xmlHttp.send();
+      });
+      rate.then(data => {
+          console.log(data); // Отладка
+          console.log(JSON.stringify(data)); // Отладка
+          jQuery("#convresult").val(JSON.stringify(data));
+        });
     }
   },
   data: function () {
